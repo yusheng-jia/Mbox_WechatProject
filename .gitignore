@@ -1,0 +1,6 @@
+# Generated files
+/target
+
+# IDEA
+*.iml
+.idea/*
