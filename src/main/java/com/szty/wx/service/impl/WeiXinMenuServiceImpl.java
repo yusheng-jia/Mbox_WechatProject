@@ -88,7 +88,7 @@ public class WeiXinMenuServiceImpl implements WeiXinMenuService{
         sub_button.setName("更多");
 
         ClickButton playMain = new ClickButton();
-        playMain.setName("我享听");
+        playMain.setName("蔓生活");
         playMain.setType("click");
         playMain.setKey("play_main");
 

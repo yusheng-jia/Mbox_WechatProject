@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szty.wxyd.dao.WxDeviceMapper">
+
+    <!--实体映射-->
+    <resultMap id="wxDeviceResultMap" type="WxDevice">
+        <!---->
+        <result column="id"  property="id" />
+        <!--设备编号，微信分配-->
+        <result column="deviceid"  property="deviceid" />
+        <!---->
+        <result column="qrticket"  property="qrticket" />
+        <!--物理地址-->
+        <result column="mac"  property="mac" />
+        <!--是否授权1已授权2：未授权-->
+        <result column="state"  property="state" />
+        <!--创建时间-->
+        <result column="create_time"  property="createTime" />
+    </resultMap>
+
+
+    <!-- 通用查询结果列-->
+    <sql id="Base_Column_List">
+        id,	deviceid,	qrticket,	mac,	state,	create_time
+    </sql>
+
+
+
+
+    <!-- 查询条件-->
+    <sql id="modelwheresql">
+        <where>
+
+            <if test="id != null and id != '' ">
+                and id = #{id}
+            </if>
+            <if test="idBegin != null and idBegin != '' ">
+                <![CDATA[
+				 and id >= #{idBegin}
+				 ]]>
+            </if>
+            <if test="deviceid != null and deviceid != '' ">
+                and deviceid = #{deviceid}
+            </if>
+            <if test="deviceidBegin != null and deviceidBegin != '' ">
+                <![CDATA[
+				 and deviceid >= #{deviceidBegin}
+				 ]]>
+            </if>
+            <if test="qrticket != null and qrticket != '' ">
+                and qrticket = #{qrticket}
+            </if>
+            <if test="qrticketBegin != null and qrticketBegin != '' ">
+                <![CDATA[
+				 and qrticket >= #{qrticketBegin}
+				 ]]>
+            </if>
+            <if test="mac != null and mac != '' ">
+                and mac = #{mac}
+            </if>
+            <if test="macBegin != null and macBegin != '' ">
+                <![CDATA[
+				 and mac >= #{macBegin}
+				 ]]>
+            </if>
+            <if test="state != null and state != '' ">
+                and state = #{state}
+            </if>
+            <if test="stateBegin != null and stateBegin != '' ">
+                <![CDATA[
+				 and state >= #{stateBegin}
+				 ]]>
+            </if>
+            <if test="createTime != null and createTime != '' ">
+                and create_time = #{createTime}
+            </if>
+            <if test="createTimeEnd != null and createTimeEnd != '' ">
+                <![CDATA[
+				 and create_time <= #{createTimeEnd}
+				 ]]>
+            </if>
+            <if test="createTimeBegin != null and createTimeBegin != '' ">
+                <![CDATA[
+				 and create_time >= #{createTimeBegin}
+				 ]]>
+            </if>
+
+        </where>
+    </sql>
+
+
+    <sql id="limitsql">
+        <if test="limitStart != null and pageSize != null">
+            <![CDATA[
+				 order by id desc limit #{limitStart} , #{pageSize}
+				 ]]>
+        </if>
+    </sql>	<!-- 添加 -->
+    <insert id="save" parameterType="WxDevice">
+        <selectKey resultType="long" keyProperty="id">
+            SELECT LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO wx_device
+        (deviceid,qrticket,mac,state,create_time)
+        VALUES
+        (#{deviceid},#{qrticket},#{mac},#{state},#{createTime})
+    </insert>
+
+    <!-- 添加 （匹配有值的字段）-->
+    <insert id="insertSelective" parameterType="wxDevice">
+        INSERT INTO wx_device
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+            <if test="id != null">
+                id,
+            </if>
+            <if test="deviceid != null">
+                deviceid,
+            </if>
+            <if test="qrticket != null">
+                qrticket,
+            </if>
+            <if test="mac != null">
+                mac,
+            </if>
+            <if test="state != null">
+                state,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides="," >
+            <if test="id!=null and id!='' ">
+                #{id},
+            </if>
+            <if test="deviceid!=null and deviceid!='' ">
+                #{deviceid},
+            </if>
+            <if test="qrticket!=null and qrticket!='' ">
+                #{qrticket},
+            </if>
+            <if test="mac!=null and mac!='' ">
+                #{mac},
+            </if>
+            <if test="state!=null and state!='' ">
+                #{state},
+            </if>
+            <if test="createTime!=null and createTime!='' ">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 添加 -->
+    <insert id="saveBatchWxDevice" parameterType="java.util.List">
+        INSERT INTO wx_device
+        (deviceid,qrticket,mac,state,create_time)
+        VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.deviceid},#{item.qrticket},#{item.mac},#{item.state},#{item.createTime})
+        </foreach>
+    </insert>
+
+    <!-- 修 改-->
+    <update id="updateByPrimaryKeySelective" parameterType="wxDevice">
+        UPDATE wx_device
+        <set>
+            <if test="id!=null and id!='' ">
+                #{id},
+            </if>
+            <if test="deviceid!=null and deviceid!='' ">
+                #{deviceid},
+            </if>
+            <if test="qrticket!=null and qrticket!='' ">
+                #{qrticket},
+            </if>
+            <if test="mac!=null and mac!='' ">
+                #{mac},
+            </if>
+            <if test="state!=null and state!='' ">
+                #{state},
+            </if>
+            <if test="createTime!=null and createTime!='' ">
+                #{createTime},
+            </if>
+
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 修 改-->
+    <update id="updateByPrimaryKey" parameterType="wxDevice">
+        UPDATE wx_device
+        SET
+        <if test="deviceid != null">
+            deviceid = #{deviceid},
+        </if>
+        <if test="qrticket != null">
+            qrticket = #{qrticket},
+        </if>
+        <if test="mac != null">
+            mac = #{mac},
+        </if>
+        <if test="state != null">
+            state = #{state},
+        </if>
+        <if test="createTime != null">
+            create_time = #{createTime},
+        </if>
+        WHERE id = #{id}
+    </update>
+    <!-- 查询（根据主键ID查询） -->
+    <select id="selectByPrimaryKey"  resultMap="wxDeviceResultMap" parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM wx_device
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询  List 查询 -->
+    <select id="queryList" resultMap="wxDeviceResultMap" parameterType="WxDevice">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM wx_device
+
+        <include refid="modelwheresql" />
+    </select>
+
+    <!-- 查询 分页总数 -->
+    <select id="queryCount"  resultType="java.lang.Integer"  parameterType="WxDevice">
+        SELECT
+        count(1)
+        FROM wx_device
+
+        <include refid="modelwheresql" />
+    </select>
+    <!-- 查询 分页查询 -->
+    <select id="queryPageList" resultMap="wxDeviceResultMap" parameterType="WxDevice">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM wx_device
+
+        <include refid="modelwheresql" />
+        <include refid="limitsql" />
+    </select>
+
+</mapper>

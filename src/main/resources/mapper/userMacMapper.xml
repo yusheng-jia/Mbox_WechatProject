@@ -1,0 +1,420 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.szty.wx.dao.UseMacMapper">
+
+    <!--实体映射 -->
+    <resultMap id="userMacResultMap" type="UserMac">
+        <!---->
+        <result column="id" property="id" />
+        <!--物理地址 -->
+        <result column="mac" property="mac" />
+        <!--支持以下四种连接协议： android classic bluetooth – 1 ios classic bluetooth – 2
+            ble 3 wifi 4 一个设备可以支持多种连接类型，用符号"|"做分割，客户端优先选择靠前的连接方式（优先级按|关系的排序依次降低），举例：
+            1：表示设备仅支持andiod classic bluetooth 1|2：表示设备支持andiod 和ios 两种classic bluetooth，但是客户端优先选择andriod
+            classic bl -->
+        <result column="connect_protocol" property="connectProtocol" />
+        <!--auth及通信的加密key，第三方需要将key烧制在设备上（128bit），格式采用16进制串的方式（长度为32字节），不需要0X前缀，如：
+            1234567890ABCDEF1234567890ABCDEF -->
+        <result column="auth_key" property="authKey" />
+        <!--断开策略，目前支持： 1：退出公众号页面时即断开连接 2：退出公众号之后保持连接不断开 -->
+        <result column="close_strategy" property="closeStrategy" />
+        <!--连接策略，32位整型，按bit位置位，目前仅第1bit和第3bit位有效（bit置0为无效，1为有效；第2bit已被废弃），且bit位可以按或置位（如1|4=5），各bit置位含义说明如下：
+            1：（第1bit置位）在公众号对话页面，不停的尝试连接设备 4：（第3bit置位）处于非公众号页面（如主界面等），微信自动连接。当用户切换微信到前台时，可能尝试去连接设备，连上后一定时间会断开 -->
+        <result column="conn_strategy" property="connStrategy" />
+        <!--auth加密方法，目前支持两种取值： 0：不加密 1：AES加密（CBC模式，PKCS7填充方式） -->
+        <result column="crypt_method" property="cryptMethod" />
+        <!--auth version，设备和微信进行auth时，会根据该版本号来确认auth buf和auth key的格式（各version对应的auth
+            buf及key的具体格式可以参看“客户端蓝牙外设协议”），该字段目前支持取值： 0：不加密的version 1：version 1 -->
+        <result column="auth_ver" property="authVer" />
+        <!--表示mac地址在厂商广播manufature data里含有mac地址的偏移，取值如下： -1：在尾部、 -2：表示不包含mac地址
+            其他：非法偏移 -->
+        <result column="manu_mac_pos" property="manuMacPos" />
+        <!--表示mac地址在厂商serial number里含有mac地址的偏移，取值如下： -1：表示在尾部 -2：表示不包含mac地址 其他：非法偏移 -->
+        <result column="ser_mac_pos" property="serMacPos" />
+        <!--精简协议类型，取值如下：计步设备精简协议：1 （若该字段填1，connect_protocol 必须包括3。非精简协议设备切勿填写该字段） -->
+        <result column="ble_simple_protocol" property="bleSimpleProtocol" />
+        <!--是否有效1:有效2无效 -->
+        <result column="state" property="state" />
+        <!--创建时间 -->
+        <result column="create_time" property="createTime" />
+    </resultMap>
+
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, mac, connect_protocol, auth_key, close_strategy,
+        conn_strategy,
+        crypt_method, auth_ver, manu_mac_pos, ser_mac_pos,
+        ble_simple_protocol, state, create_time
+    </sql>
+
+
+    <sql id="limitsql">
+        <if test="limitStart != null and pageSize != null">
+            <![CDATA[
+				 order by id desc limit #{limitStart} , #{pageSize}
+				 ]]>
+        </if>
+    </sql>	<!-- 添加 -->
+
+
+    <!-- 查询条件 -->
+    <sql id="modelwheresql">
+        <where>
+
+            <if test="id != null and id != '' ">
+                and id = #{id}
+            </if>
+            <if test="idBegin != null and idBegin != '' ">
+                <![CDATA[
+				 and id >= #{idBegin}
+				 ]]>
+            </if>
+            <if test="mac != null and mac != '' ">
+                and mac = #{mac}
+            </if>
+            <if test="macBegin != null and macBegin != '' ">
+                <![CDATA[
+				 and mac >= #{macBegin}
+				 ]]>
+            </if>
+            <if test="connectProtocol != null and connectProtocol != '' ">
+                and connect_protocol = #{connectProtocol}
+            </if>
+            <if test="connectProtocolBegin != null and connectProtocolBegin != '' ">
+                <![CDATA[
+				 and connect_protocol >= #{connectProtocolBegin}
+				 ]]>
+            </if>
+            <if test="authKey != null and authKey != '' ">
+                and auth_key = #{authKey}
+            </if>
+            <if test="authKeyBegin != null and authKeyBegin != '' ">
+                <![CDATA[
+				 and auth_key >= #{authKeyBegin}
+				 ]]>
+            </if>
+            <if test="closeStrategy != null and closeStrategy != '' ">
+                and close_strategy = #{closeStrategy}
+            </if>
+            <if test="closeStrategyBegin != null and closeStrategyBegin != '' ">
+                <![CDATA[
+				 and close_strategy >= #{closeStrategyBegin}
+				 ]]>
+            </if>
+            <if test="connStrategy != null and connStrategy != '' ">
+                and conn_strategy = #{connStrategy}
+            </if>
+            <if test="connStrategyBegin != null and connStrategyBegin != '' ">
+                <![CDATA[
+				 and conn_strategy >= #{connStrategyBegin}
+				 ]]>
+            </if>
+            <if test="cryptMethod != null and cryptMethod != '' ">
+                and crypt_method = #{cryptMethod}
+            </if>
+            <if test="cryptMethodBegin != null and cryptMethodBegin != '' ">
+                <![CDATA[
+				 and crypt_method >= #{cryptMethodBegin}
+				 ]]>
+            </if>
+            <if test="authVer != null and authVer != '' ">
+                and auth_ver = #{authVer}
+            </if>
+            <if test="authVerBegin != null and authVerBegin != '' ">
+                <![CDATA[
+				 and auth_ver >= #{authVerBegin}
+				 ]]>
+            </if>
+            <if test="manuMacPos != null and manuMacPos != '' ">
+                and manu_mac_pos = #{manuMacPos}
+            </if>
+            <if test="manuMacPosBegin != null and manuMacPosBegin != '' ">
+                <![CDATA[
+				 and manu_mac_pos >= #{manuMacPosBegin}
+				 ]]>
+            </if>
+            <if test="serMacPos != null and serMacPos != '' ">
+                and ser_mac_pos = #{serMacPos}
+            </if>
+            <if test="serMacPosBegin != null and serMacPosBegin != '' ">
+                <![CDATA[
+				 and ser_mac_pos >= #{serMacPosBegin}
+				 ]]>
+            </if>
+            <if test="bleSimpleProtocol != null and bleSimpleProtocol != '' ">
+                and ble_simple_protocol = #{bleSimpleProtocol}
+            </if>
+            <if
+                    test="bleSimpleProtocolBegin != null and bleSimpleProtocolBegin != '' ">
+                <![CDATA[
+				 and ble_simple_protocol >= #{bleSimpleProtocolBegin}
+				 ]]>
+            </if>
+            <if test="state != null and state != '' ">
+                and state = #{state}
+            </if>
+            <if test="stateBegin != null and stateBegin != '' ">
+                <![CDATA[
+				 and state >= #{stateBegin}
+				 ]]>
+            </if>
+            <if test="createTime != null and createTime != '' ">
+                and create_time = #{createTime}
+            </if>
+            <if test="createTimeEnd != null and createTimeEnd != '' ">
+                <![CDATA[
+				 and create_time <= #{createTimeEnd}
+				 ]]>
+            </if>
+            <if test="createTimeBegin != null and createTimeBegin != '' ">
+                <![CDATA[
+				 and create_time >= #{createTimeBegin}
+				 ]]>
+            </if>
+
+        </where>
+    </sql>
+
+
+    <insert id="save" parameterType="UserMac">
+        <selectKey resultType="long" keyProperty="id">
+            SELECT
+            LAST_INSERT_ID()
+        </selectKey>
+        INSERT INTO user_mac
+        (mac,connect_protocol,auth_key,close_strategy,conn_strategy,crypt_method,auth_ver,manu_mac_pos,ser_mac_pos,ble_simple_protocol,state,create_time)
+        VALUES
+        (#{mac},#{connectProtocol},#{authKey},#{closeStrategy},#{connStrategy},#{cryptMethod},#{authVer},#{manuMacPos},#{serMacPos},#{bleSimpleProtocol},#{state},#{createTime})
+    </insert>
+
+    <!-- 添加 （匹配有值的字段） -->
+    <insert id="insertSelective" parameterType="userMac">
+        INSERT INTO user_mac
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">
+                id,
+            </if>
+            <if test="mac != null">
+                mac,
+            </if>
+            <if test="connectProtocol != null">
+                connect_protocol,
+            </if>
+            <if test="authKey != null">
+                auth_key,
+            </if>
+            <if test="closeStrategy != null">
+                close_strategy,
+            </if>
+            <if test="connStrategy != null">
+                conn_strategy,
+            </if>
+            <if test="cryptMethod != null">
+                crypt_method,
+            </if>
+            <if test="authVer != null">
+                auth_ver,
+            </if>
+            <if test="manuMacPos != null">
+                manu_mac_pos,
+            </if>
+            <if test="serMacPos != null">
+                ser_mac_pos,
+            </if>
+            <if test="bleSimpleProtocol != null">
+                ble_simple_protocol,
+            </if>
+            <if test="state != null">
+                state,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id!=null and id!='' ">
+                #{id},
+            </if>
+            <if test="mac!=null and mac!='' ">
+                #{mac},
+            </if>
+            <if test="connectProtocol!=null and connectProtocol!='' ">
+                #{connectProtocol},
+            </if>
+            <if test="authKey!=null and authKey!='' ">
+                #{authKey},
+            </if>
+            <if test="closeStrategy!=null and closeStrategy!='' ">
+                #{closeStrategy},
+            </if>
+            <if test="connStrategy!=null and connStrategy!='' ">
+                #{connStrategy},
+            </if>
+            <if test="cryptMethod!=null and cryptMethod!='' ">
+                #{cryptMethod},
+            </if>
+            <if test="authVer!=null and authVer!='' ">
+                #{authVer},
+            </if>
+            <if test="manuMacPos!=null and manuMacPos!='' ">
+                #{manuMacPos},
+            </if>
+            <if test="serMacPos!=null and serMacPos!='' ">
+                #{serMacPos},
+            </if>
+            <if test="bleSimpleProtocol!=null and bleSimpleProtocol!='' ">
+                #{bleSimpleProtocol},
+            </if>
+            <if test="state!=null and state!='' ">
+                #{state},
+            </if>
+            <if test="createTime!=null and createTime!='' ">
+                #{createTime},
+            </if>
+        </trim>
+    </insert>
+
+    <!-- 添加 -->
+    <insert id="saveBatchUserMac" parameterType="java.util.List">
+        INSERT INTO user_mac
+        (mac,connect_protocol,auth_key,close_strategy,conn_strategy,crypt_method,auth_ver,manu_mac_pos,ser_mac_pos,ble_simple_protocol,state,create_time)
+        VALUES
+        <foreach collection="list" item="item" index="index"
+                 separator=",">
+            (#{item.mac},#{item.connectProtocol},#{item.authKey},#{item.closeStrategy},#{item.connStrategy},#{item.cryptMethod},#{item.authVer},#{item.manuMacPos},#{item.serMacPos},#{item.bleSimpleProtocol},#{item.state},#{item.createTime})
+        </foreach>
+    </insert>
+
+    <!-- 修 改 -->
+    <update id="updateByPrimaryKeySelective" parameterType="userMac">
+        UPDATE user_mac
+        <set>
+            <if test="id!=null and id!='' ">
+                #{id},
+            </if>
+            <if test="mac!=null and mac!='' ">
+                #{mac},
+            </if>
+            <if test="connectProtocol!=null and connectProtocol!='' ">
+                #{connectProtocol},
+            </if>
+            <if test="authKey!=null and authKey!='' ">
+                #{authKey},
+            </if>
+            <if test="closeStrategy!=null and closeStrategy!='' ">
+                #{closeStrategy},
+            </if>
+            <if test="connStrategy!=null and connStrategy!='' ">
+                #{connStrategy},
+            </if>
+            <if test="cryptMethod!=null and cryptMethod!='' ">
+                #{cryptMethod},
+            </if>
+            <if test="authVer!=null and authVer!='' ">
+                #{authVer},
+            </if>
+            <if test="manuMacPos!=null and manuMacPos!='' ">
+                #{manuMacPos},
+            </if>
+            <if test="serMacPos!=null and serMacPos!='' ">
+                #{serMacPos},
+            </if>
+            <if test="bleSimpleProtocol!=null and bleSimpleProtocol!='' ">
+                #{bleSimpleProtocol},
+            </if>
+            <if test="state!=null and state!='' ">
+                #{state},
+            </if>
+            <if test="createTime!=null and createTime!='' ">
+                #{createTime},
+            </if>
+
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- 修 改 -->
+    <update id="updateByPrimaryKey" parameterType="userMac">
+        UPDATE user_mac
+        SET
+        <if test="mac != null">
+            mac = #{mac},
+        </if>
+        <if test="connectProtocol != null">
+            connect_protocol = #{connectProtocol},
+        </if>
+        <if test="authKey != null">
+            auth_key = #{authKey},
+        </if>
+        <if test="closeStrategy != null">
+            close_strategy = #{closeStrategy},
+        </if>
+        <if test="connStrategy != null">
+            conn_strategy = #{connStrategy},
+        </if>
+        <if test="cryptMethod != null">
+            crypt_method = #{cryptMethod},
+        </if>
+        <if test="authVer != null">
+            auth_ver = #{authVer},
+        </if>
+        <if test="manuMacPos != null">
+            manu_mac_pos = #{manuMacPos},
+        </if>
+        <if test="serMacPos != null">
+            ser_mac_pos = #{serMacPos},
+        </if>
+        <if test="bleSimpleProtocol != null">
+            ble_simple_protocol = #{bleSimpleProtocol},
+        </if>
+        <if test="state != null">
+            state = #{state},
+        </if>
+        <if test="createTime != null">
+            create_time = #{createTime},
+        </if>
+        WHERE id = #{id}
+    </update>
+    <!-- 查询（根据主键ID查询） -->
+    <select id="selectByPrimaryKey" resultMap="userMacResultMap"
+            parameterType="java.lang.Long">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM user_mac
+        WHERE id = #{id}
+    </select>
+
+    <!-- 查询 List 查询 -->
+    <select id="queryList" resultMap="userMacResultMap"
+            parameterType="UserMac">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM user_mac
+
+        <include refid="modelwheresql" />
+    </select>
+
+    <!-- 查询 分页总数 -->
+    <select id="queryCount" resultType="java.lang.Integer"
+            parameterType="UserMac">
+        SELECT
+        count(1)
+        FROM user_mac
+
+        <include refid="modelwheresql" />
+    </select>
+    <!-- 查询 分页查询 -->
+    <select id="queryPageList" resultMap="userMacResultMap  "
+            parameterType="UserMac">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM user_mac
+
+        <include refid="modelwheresql" />
+        <include refid="limitsql" />
+    </select>
+
+</mapper>

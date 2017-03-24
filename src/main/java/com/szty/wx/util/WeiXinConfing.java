@@ -49,5 +49,5 @@ public class WeiXinConfing {
     @Value("#{wxconfing.wx_old_authorize_device_url}")
     public String oldAuthorizeDeviceUrl;//原始设备授权接口
     @Value("#{wxconfing.wx_create_qrcode}")
-    public String createQrcode;//查询设备二维码
+    public String createQrcode;//获取设备二维码
 }

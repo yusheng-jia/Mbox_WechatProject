@@ -11,12 +11,27 @@
     http://www.springframework.org/schema/context/spring-context-3.2.xsd
     http://www.springframework.org/schema/mvc
     http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd">
-     
-     <mvc:annotation-driven /> 
+
+     <!-- content negotiation -->
+     <mvc:annotation-driven content-negotiation-manager="contentManager"/>
+     <bean id="contentManager"
+           class="org.springframework.web.accept.ContentNegotiationManagerFactoryBean">
+          <property name="favorPathExtension" value="true" />
+          <property name="ignoreAcceptHeader" value="true" />
+          <property name="defaultContentType" value="text/html" />
+          <property name="useJaf" value="false" />
+          <property name="mediaTypes">
+               <map>
+                    <entry key="json" value="application/json" />
+                    <entry key="html" value="text/html" />
+                    <entry key="xml" value="application/xml" />
+               </map>
+          </property>
+     </bean>
      <!-- 扫描controller（controller层注入） -->
      <context:component-scan base-package="com.szty.wx.controller"/>
-     
+     <mvc:resources mapping="/img/**" location="/img/"/>
      <!-- 对模型视图添加前后缀 -->
      <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver"
-      p:prefix="/WEB-INF/view/" p:suffix=".jsp"/>
+      p:prefix="/WEB-INF/" p:suffix=".jsp"/>
 </beans>
